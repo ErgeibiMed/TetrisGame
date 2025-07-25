@@ -4,7 +4,7 @@ CFLAGS:=-Wall -Wextra -Wpedantic -ggdb -O3 -std=c11
 
 LIBS:= -lraylib -lm
 
-INPUT:=main.c
+INPUT:=main.c blocks.c
 
 OUTPUT=TetrisGame
 
