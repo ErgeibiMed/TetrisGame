@@ -1,262 +1,159 @@
-
-
 #include "blocks.h"
-#include <raylib.h>
+#include "raylib.h"
 #include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-void draw_piece(piece_t *piece, Vector2 *pos_block_1, Vector2 size) {
-  switch (piece->piece_name) {
+All_Recs_t *allocAllPieces(void) {
+  All_Recs_t *all_pieces = (All_Recs_t *)malloc(sizeof(All_Recs_t));
+  if (all_pieces == NULL) {
+    fprintf(stderr, "ERROR COULD NOT CREATE ALL_PIECES \n");
+    return NULL;
+  }
+  all_pieces->len = 0;
+  size_t capacity =
+      GetScreenWidth() * GetScreenHeight() / (BLOCK_SIZE * BLOCK_SIZE);
+  all_pieces->cap = capacity;
+  all_pieces->all = malloc(sizeof(Rectangle *) * all_pieces->cap);
+  for (size_t i = 0; i < all_pieces->cap; i++) {
+    all_pieces->all[i] = malloc(sizeof(Rectangle));
+  }
+
+  return all_pieces;
+}
+
+piece_t *create_piece(void) {
+  Vector2 initial_pos = {.x = GetScreenWidth() / 2.0, .y = 0.0};
+  enum piece_name p_n = (rand() % 7); // THE number of pieces is 7
+  piece_t *piece = malloc(sizeof(piece_t));
+  if (piece == NULL) {
+    fprintf(stderr, "ERROR COULD NOT CREATE PIECE \n");
+    return NULL;
+  }
+  piece->active = false;
+  piece->piece_name = p_n;
+  piece->block[0].x = initial_pos.x;
+  piece->block[0].y = initial_pos.y;
+  switch (p_n) {
   case T:
-    if (piece->hide == 1) {
-      draw_piece_T(piece, pos_block_1, size);
-    }
+    piece->dir = UP;
+    // block[1] is under block[0]
+    piece->block[1].x = piece->block[0].x;
+    piece->block[1].y = piece->block[0].y + BLOCK_SIZE;
+
+    // block[2] is on the left of block[1]
+    piece->block[2].x = piece->block[1].x - BLOCK_SIZE;
+    piece->block[2].y = piece->block[1].y;
+    // block[3] is on the right of block[1]
+    piece->block[3].x = piece->block[1].x + BLOCK_SIZE;
+    piece->block[3].y = piece->block[1].y;
+    // each pice has a color
+    piece->p_color = RED;
     break;
   case Square:
-    if (piece->hide == 1) {
-      draw_piece_Square(piece, pos_block_1, size);
-    }
+    piece->dir = UP;
+    // block[1] is under block[0]
+    piece->block[1].x = piece->block[0].x;
+    piece->block[1].y = piece->block[0].y + BLOCK_SIZE;
+    // block[2] is on the left of block[1]
+    piece->block[2].x = piece->block[1].x - BLOCK_SIZE;
+    piece->block[2].y = piece->block[1].y;
+    // block[3] is on top of block[2]
+    piece->block[3].x = piece->block[2].x;
+    piece->block[3].y = piece->block[2].y - BLOCK_SIZE;
+    // each pice has a color
+    piece->p_color = GREEN;
     break;
   case Stick:
-    if (piece->hide == 1) {
-      draw_piece_Stick(piece, pos_block_1, size);
-    }
+    piece->dir = UP;
+    // block[1] is under block[0]
+    piece->block[1].x = piece->block[0].x;
+    piece->block[1].y = piece->block[0].y + BLOCK_SIZE;
+    // block[2] is under block[1]
+    piece->block[2].x = piece->block[1].x;
+    piece->block[2].y = piece->block[1].y + BLOCK_SIZE;
+    // block[3] is under block[2]
+    piece->block[3].x = piece->block[2].x;
+    piece->block[3].y = piece->block[2].y + BLOCK_SIZE;
+    // each pice has a color
+    piece->p_color = BLUE;
     break;
   case L_left:
-    if (piece->hide == 1) {
-      draw_piece_L_left(piece, pos_block_1, size);
-    }
+    piece->dir = LEFT;
+    // block[1] is on the right of block[0]
+    piece->block[1].x = piece->block[0].x + BLOCK_SIZE;
+    piece->block[1].y = piece->block[0].y;
+    // block[2] is on top of block[1]
+    piece->block[2].x = piece->block[1].x;
+    piece->block[2].y = piece->block[1].y - BLOCK_SIZE;
+    // block[3] is on the top of block[2]
+    piece->block[3].x = piece->block[2].x;
+    piece->block[3].y = piece->block[2].y - BLOCK_SIZE;
+    // each pice has a color
+    piece->p_color = YELLOW;
     break;
   case L_right:
-    if (piece->hide == 1) {
-      draw_piece_L_right(piece, pos_block_1, size);
-    }
+    piece->dir = RIGHT;
+    // block[1] is on the left block[0]
+    piece->block[1].x = piece->block[0].x - BLOCK_SIZE;
+    piece->block[1].y = piece->block[0].y;
+    // block[2] is on top of block[1]
+    piece->block[2].x = piece->block[1].x;
+    piece->block[2].y = piece->block[1].y - BLOCK_SIZE;
+    // block[3] is on top of block[2]
+    piece->block[3].x = piece->block[2].x;
+    piece->block[3].y = piece->block[2].y - BLOCK_SIZE;
+    // each pice has a color
+    piece->p_color = ORANGE;
     break;
   case Dog_left:
-    if (piece->hide == 1) {
-      draw_piece_Dog_left(piece, pos_block_1, size);
-    }
+    piece->dir = LEFT;
+    // block[1] is on the right of block[0]
+    piece->block[1].x = piece->block[0].x + BLOCK_SIZE;
+    piece->block[1].y = piece->block[0].y;
+    // block[2] is under block[1]
+    piece->block[2].x = piece->block[0].x;
+    piece->block[2].y = piece->block[0].y + BLOCK_SIZE;
+    // block[3] is on the right of block[2]
+    piece->block[3].x = piece->block[2].x + BLOCK_SIZE;
+    piece->block[3].y = piece->block[2].y;
+    // each pice has a color
+    piece->p_color = BLUE;
     break;
   case Dog_right:
-    if (piece->hide == 1) {
-      draw_piece_Dog_right(piece, pos_block_1, size);
-    }
+    piece->dir = RIGHT;
+    // block[1] is on the left of block[0]
+    piece->block[1].x = piece->block[0].x - BLOCK_SIZE;
+    piece->block[1].y = piece->block[0].y;
+    // block[2] is under block[1]
+    piece->block[2].x = piece->block[0].x;
+    piece->block[2].y = piece->block[0].y + BLOCK_SIZE;
+    // block[3] is on the left of block[2]
+    piece->block[3].x = piece->block[2].x - BLOCK_SIZE;
+    piece->block[3].y = piece->block[2].y;
+    // each pice has a color
+    piece->p_color = VIOLET;
     break;
-  default:
-    break;
+  }
+  // each has consist of 4 rectangle of size BLOCK_SIZE
+  for (size_t i = 0; i < 4; i++) {
+    piece->block[i].height = BLOCK_SIZE;
+    piece->block[i].width = BLOCK_SIZE;
+  }
+  return piece;
+}
+
+// void update_piece_pos(piece_t *piece) {}
+
+void draw_piece(piece_t *piece) {
+  for (int i = 0; i < 4; i++) {
+    DrawRectangleRec(piece->block[i], piece->p_color);
   }
 }
 
-void draw_piece_T(piece_t *piece, Vector2 *pos_block_1, Vector2 size) {
-  piece->block[0] = *pos_block_1;
-  // block[1] is under block[0]
-  piece->block[1].x = piece->block[0].x;
-  piece->block[1].y = piece->block[0].y + BLOCK_SIZE;
-  // block[2] is on the left of block[1]
-  piece->block[2].x = piece->block[1].x - BLOCK_SIZE;
-  piece->block[2].y = piece->block[1].y;
-  // block[3] is on the right of block[1]
-  piece->block[3].x = piece->block[1].x + BLOCK_SIZE;
-  piece->block[3].y = piece->block[1].y;
-  piece->p_color = RED;
-  for (int i = 0; i < 4; i++) {
-    DrawRectangleV(piece->block[i], size, piece->p_color);
+void free_All_pieces(All_Recs_t *all_pieces) {
+  for (size_t i = 0; i < all_pieces->cap; i++) {
+    free(all_pieces->all[i]);
   }
+  free(all_pieces);
 }
-void draw_piece_Square(piece_t *piece, Vector2 *pos_block_1, Vector2 size) {
-  piece->block[0] = *pos_block_1;
-  // block[1] is under block[0]
-  piece->block[1].x = piece->block[0].x;
-  piece->block[1].y = piece->block[0].y + BLOCK_SIZE;
-  // block[2] is on the left of block[1]
-  piece->block[2].x = piece->block[1].x - BLOCK_SIZE;
-  piece->block[2].y = piece->block[1].y;
-  // block[3] is on top of block[2]
-  piece->block[3].x = piece->block[2].x;
-  piece->block[3].y = piece->block[2].y - BLOCK_SIZE;
-  piece->p_color = RED;
-  for (int i = 0; i < 4; i++) {
-    DrawRectangleV(piece->block[i], size, piece->p_color);
-  }
-}
-void draw_piece_Stick(piece_t *piece, Vector2 *pos_block_1, Vector2 size) {
-  piece->block[0] = *pos_block_1;
-  // block[1] is under block[0]
-  piece->block[1].x = piece->block[0].x;
-  piece->block[1].y = piece->block[0].y + BLOCK_SIZE;
-  // block[2] is under block[1]
-  piece->block[2].x = piece->block[1].x;
-  piece->block[2].y = piece->block[1].y + BLOCK_SIZE;
-  // block[3] is under block[2]
-  piece->block[3].x = piece->block[2].x;
-  piece->block[3].y = piece->block[2].y + BLOCK_SIZE;
-  piece->p_color = RED;
-  for (int i = 0; i < 4; i++) {
-    DrawRectangleV(piece->block[i], size, piece->p_color);
-  }
-}
-void draw_piece_L_left(piece_t *piece, Vector2 *pos_block_1, Vector2 size) {
-  piece->block[0] = *pos_block_1;
-  // block[1] is under block[0]
-  piece->block[1].x = piece->block[0].x;
-  piece->block[1].y = piece->block[0].y + BLOCK_SIZE;
-  // block[2] is under block[1]
-  piece->block[2].x = piece->block[1].x;
-  piece->block[2].y = piece->block[1].y + BLOCK_SIZE;
-  // block[3] is on the left of block[2]
-  piece->block[3].x = piece->block[2].x - BLOCK_SIZE;
-  piece->block[3].y = piece->block[2].y;
-  piece->p_color = RED;
-  for (int i = 0; i < 4; i++) {
-    DrawRectangleV(piece->block[i], size, piece->p_color);
-  }
-}
-
-void draw_piece_L_right(piece_t *piece, Vector2 *pos_block_1, Vector2 size) {
-  piece->block[0] = *pos_block_1;
-  // block[1] is under block[0]
-  piece->block[1].x = piece->block[0].x;
-  piece->block[1].y = piece->block[0].y + BLOCK_SIZE;
-  // block[2] is under block[1]
-  piece->block[2].x = piece->block[1].x;
-  piece->block[2].y = piece->block[1].y + BLOCK_SIZE;
-  // block[3] is on the right of block[2]
-  piece->block[3].x = piece->block[2].x + BLOCK_SIZE;
-  piece->block[3].y = piece->block[2].y;
-  piece->p_color = RED;
-  for (int i = 0; i < 4; i++) {
-    DrawRectangleV(piece->block[i], size, piece->p_color);
-  }
-}
-void draw_piece_Dog_left(piece_t *piece, Vector2 *pos_block_1, Vector2 size) {
-  piece->block[0] = *pos_block_1;
-  // block[1] is on the left block[0]
-  piece->block[1].x = piece->block[0].x - BLOCK_SIZE;
-  piece->block[1].y = piece->block[0].y;
-  // block[2] is under block[0]
-  piece->block[2].x = piece->block[0].x;
-  piece->block[2].y = piece->block[0].y + BLOCK_SIZE;
-  // block[3] is on the right of block[2]
-  piece->block[3].x = piece->block[2].x + BLOCK_SIZE;
-  piece->block[3].y = piece->block[2].y;
-  piece->p_color = RED;
-  for (int i = 0; i < 4; i++) {
-    DrawRectangleV(piece->block[i], size, piece->p_color);
-  }
-}
-void draw_piece_Dog_right(piece_t *piece, Vector2 *pos_block_1, Vector2 size) {
-  piece->block[0] = *pos_block_1;
-  // block[1] is on the right of block[0]
-  piece->block[1].x = piece->block[0].x + BLOCK_SIZE;
-  piece->block[1].y = piece->block[0].y;
-  // block[2] is under block[0]
-  piece->block[2].x = piece->block[0].x;
-  piece->block[2].y = piece->block[0].y + BLOCK_SIZE;
-  // block[3] is on the left of block[2]
-  piece->block[3].x = piece->block[2].x - BLOCK_SIZE;
-  piece->block[3].y = piece->block[2].y;
-  piece->p_color = RED;
-  for (int i = 0; i < 4; i++) {
-    DrawRectangleV(piece->block[i], size, piece->p_color);
-  }
-}
-
-void move_piece_left(piece_t *piece) {
-  switch (piece->piece_name) {
-  case T: {
-    bool border_left = piece->block[2].x > (BLOCK_SIZE * 0.05);
-    if (border_left) {
-      piece->block[0].x -= BLOCK_SIZE;
-    }
-  } break;
-  case Stick: {
-    bool border_left = piece->block[0].x > (BLOCK_SIZE * 0.05);
-    if (border_left) {
-      piece->block[0].x -= BLOCK_SIZE;
-    }
-  } break;
-  case Square: {
-    bool border_left = piece->block[2].x > (BLOCK_SIZE * 0.05);
-    if (border_left) {
-      piece->block[0].x -= BLOCK_SIZE;
-    }
-  } break;
-  case L_left: {
-    bool border_left = piece->block[3].x > (BLOCK_SIZE * 0.05);
-    if (border_left) {
-      piece->block[0].x -= BLOCK_SIZE;
-    }
-  } break;
-  case L_right: {
-    bool border_left = piece->block[2].x > (BLOCK_SIZE * 0.05);
-    if (border_left) {
-      piece->block[0].x -= BLOCK_SIZE;
-    }
-  } break;
-  case Dog_left: {
-    bool border_left = piece->block[1].x > (BLOCK_SIZE * 0.05);
-    if (border_left) {
-      piece->block[0].x -= BLOCK_SIZE;
-    }
-  } break;
-  case Dog_right: {
-    bool border_left = piece->block[3].x > (BLOCK_SIZE * 0.05);
-    if (border_left) {
-      piece->block[0].x -= BLOCK_SIZE;
-    }
-  } break;
-  }
-}
-void move_piece_right(piece_t *piece) {
-  switch (piece->piece_name) {
-  case T: {
-    bool border_right =
-        piece->block[3].x < (GetScreenWidth() - (BLOCK_SIZE * 0.05));
-    if (border_right) {
-      piece->block[0].x += BLOCK_SIZE;
-    }
-  } break;
-  case Stick: {
-    bool border_right =
-        piece->block[0].x < (GetScreenWidth() - (BLOCK_SIZE * 0.05));
-    if (border_right) {
-      piece->block[0].x += BLOCK_SIZE;
-    }
-  } break;
-  case Square: {
-    bool border_right =
-        piece->block[1].x < (GetScreenWidth() - (BLOCK_SIZE * 0.05));
-    if (border_right) {
-      piece->block[0].x += BLOCK_SIZE;
-    }
-  } break;
-  case L_left: {
-    bool border_right =
-        piece->block[2].x < (GetScreenWidth() - (BLOCK_SIZE * 0.05));
-    if (border_right) {
-      piece->block[0].x += BLOCK_SIZE;
-    }
-  } break;
-  case L_right: {
-    bool border_right =
-        piece->block[3].x < (GetScreenWidth() - (BLOCK_SIZE * 0.05));
-    if (border_right) {
-      piece->block[0].x += BLOCK_SIZE;
-    }
-  } break;
-  case Dog_left: {
-    bool border_right =
-        piece->block[3].x < (GetScreenWidth() - (BLOCK_SIZE * 0.05));
-    if (border_right) {
-      piece->block[0].x += BLOCK_SIZE;
-    }
-  } break;
-  case Dog_right: {
-    bool border_right =
-        piece->block[1].x < (GetScreenWidth() - (BLOCK_SIZE * 0.05));
-    if (border_right) {
-      piece->block[0].x += BLOCK_SIZE;
-    }
-  } break;
-  }
-}
-void move_piece_down(piece_t *piece) {}

@@ -1,24 +1,30 @@
 CC:=gcc
 
-CFLAGS:=-Wall -Wextra -Wpedantic -ggdb -O3 -std=c11
+CFLAGS:=-Wall -Wextra -Wpedantic -ggdb -O0 -std=c11
 
-LIBS:= -lraylib -lm
+LIBS:=  -lm
+
+RAYLIB:= -I$(HOME)/raylib/src/ -L$(HOME)/raylib/src/  -l:libraylib.a 
 
 INPUT:=main.c blocks.c
 
-OUTPUT=TetrisGame
+BUILD_DIR:= build
 
-$(OUTPUT): $(INPUT)
-	$(CC) $(CFLAGS) -o $(OUTPUT)  $(INPUT) $(LIBS)
+OUTPUT=$(BUILD_DIR)/TetrisGame
 
+$(OUTPUT): $(INPUT) $(BUILD_DIR)
+	$(CC) $(CFLAGS) -o $(OUTPUT)  $(INPUT)  $(RAYLIB) $(LIBS)
+
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
 
 all: $(OUTPUT)
-	$(info INFO: CREATED TETRIS SUCCESSFULLY)
+	$(info [INFO] BUILD GAME SUCCESSFULLY)
 
 run: $(OUTPUT)
 	./$(OUTPUT)
 
 
 clean:
-	rm -v $(OUTPUT)
+	rm -rv $(BUILD_DIR)
 
