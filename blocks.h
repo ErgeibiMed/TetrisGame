@@ -5,6 +5,7 @@
 #include <stddef.h>
 
 #define BLOCK_SIZE 10
+#define EPSILON 0.01
 /* raylib api only provide a function
  * to draw rectangles
  * but all pieces consiste of squares(ie:block)
@@ -35,19 +36,22 @@ typedef struct Piece {
   Rectangle block[4];
 } piece_t;
 
+typedef struct Rec_with_color {
+  Color color;
+  Rectangle rec;
+} Rec_with_color_t;
+
 typedef struct All_Recs {
   size_t len;
   size_t cap;
-  Rectangle **all;
+  Rec_with_color_t **all;
 } All_Recs_t;
 
 All_Recs_t *allocAllPieces(void);
 void free_All_pieces(All_Recs_t *all_pieces);
-piece_t *create_piece(void);
+void create_piece(piece_t *piece);
 void draw_piece(piece_t *piece);
 
-void move_piece_left(piece_t *piece);
-void move_piece_right(piece_t *piece);
-void update_piece_pos(piece_t *piece, float speed);
+bool update_piece_pos(piece_t *piece, KeyboardKey key, float speed);
 
 #endif

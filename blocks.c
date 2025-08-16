@@ -14,22 +14,17 @@ All_Recs_t *allocAllPieces(void) {
   size_t capacity =
       GetScreenWidth() * GetScreenHeight() / (BLOCK_SIZE * BLOCK_SIZE);
   all_pieces->cap = capacity;
-  all_pieces->all = malloc(sizeof(Rectangle *) * all_pieces->cap);
+  all_pieces->all = malloc(sizeof(Rec_with_color_t *) * all_pieces->cap);
   for (size_t i = 0; i < all_pieces->cap; i++) {
-    all_pieces->all[i] = malloc(sizeof(Rectangle));
+    all_pieces->all[i] = malloc(sizeof(Rec_with_color_t));
   }
 
   return all_pieces;
 }
 
-piece_t *create_piece(void) {
+void create_piece(piece_t *piece) {
   Vector2 initial_pos = {.x = GetScreenWidth() / 2.0, .y = 0.0};
   enum piece_name p_n = (rand() % 7); // THE number of pieces is 7
-  piece_t *piece = malloc(sizeof(piece_t));
-  if (piece == NULL) {
-    fprintf(stderr, "ERROR COULD NOT CREATE PIECE \n");
-    return NULL;
-  }
   piece->active = false;
   piece->piece_name = p_n;
   piece->block[0].x = initial_pos.x;
@@ -140,10 +135,72 @@ piece_t *create_piece(void) {
     piece->block[i].height = BLOCK_SIZE;
     piece->block[i].width = BLOCK_SIZE;
   }
-  return piece;
 }
 
-// void update_piece_pos(piece_t *piece) {}
+bool update_piece_pos(piece_t *piece, KeyboardKey key, float speed) {
+  float closest_to_floor = piece->block[0].y;
+  float closest_to_right_brder = piece->block[0].x;
+  float closest_to_left_border = piece->block[0].x;
+  for (size_t j = 0; j < 4; j++) {
+    if (piece->block[j].x > closest_to_right_brder) {
+      closest_to_right_brder = piece->block[j].x;
+    }
+    if (piece->block[j].x < closest_to_left_border) {
+      closest_to_left_border = piece->block[j].x;
+    }
+    if (piece->block[j].y > closest_to_floor) {
+      closest_to_floor = piece->block[j].y;
+    }
+  }
+  bool reached_floor = (closest_to_floor == (GetScreenHeight() - BLOCK_SIZE));
+
+  bool reached_left_border =
+      (closest_to_left_border - BLOCK_SIZE / 10.0) < EPSILON;
+  bool reached_right_border =
+      (closest_to_right_brder - (GetScreenWidth() - BLOCK_SIZE / 10.0)) <
+      EPSILON;
+  // update piece pos
+  //
+  // KEY_RIGHT           = 262,      // Key: Cursor right
+  // KEY_LEFT            = 263,      // Key: Cursor left
+  // KEY_DOWN            = 264,      // Key: Cursor down
+  // KEY_UP              = 265,      // Key: Cursor up
+  if (reached_floor == true) {
+    return true;
+  } else {
+    if (key == KEY_DOWN) {
+      piece->block[0].y += (BLOCK_SIZE * 2 * speed);
+      piece->block[1].y += (BLOCK_SIZE * 2 * speed);
+      piece->block[2].y += (BLOCK_SIZE * 2 * speed);
+      piece->block[3].y += (BLOCK_SIZE * 2 * speed);
+    } else {
+      piece->block[0].y += (BLOCK_SIZE * speed);
+      piece->block[1].y += (BLOCK_SIZE * speed);
+      piece->block[2].y += (BLOCK_SIZE * speed);
+      piece->block[3].y += (BLOCK_SIZE * speed);
+    }
+  }
+
+  // move piece to the left logic
+  if (key == KEY_LEFT) {
+    if (!reached_left_border) {
+      // move piece to the left
+      piece->block[0].x -= (BLOCK_SIZE * speed);
+      piece->block[1].x -= (BLOCK_SIZE * speed);
+      piece->block[2].x -= (BLOCK_SIZE * speed);
+      piece->block[3].x -= (BLOCK_SIZE * speed);
+    }
+  } // move piece to the right logic
+  if (key == KEY_RIGHT) {
+    if (!reached_right_border) {
+      piece->block[0].x += (BLOCK_SIZE * speed);
+      piece->block[1].x += (BLOCK_SIZE * speed);
+      piece->block[2].x += (BLOCK_SIZE * speed);
+      piece->block[3].x += (BLOCK_SIZE * speed);
+    }
+  }
+  return false;
+}
 
 void draw_piece(piece_t *piece) {
   for (int i = 0; i < 4; i++) {
@@ -155,5 +212,6 @@ void free_All_pieces(All_Recs_t *all_pieces) {
   for (size_t i = 0; i < all_pieces->cap; i++) {
     free(all_pieces->all[i]);
   }
+  free(all_pieces->all);
   free(all_pieces);
 }
