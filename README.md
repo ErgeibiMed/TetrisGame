@@ -3,7 +3,7 @@
 
 
 ## Progess So Far
-
+https://github.com/ErgeibiMed/TetrisGame/blob/main/ProgressSoFar.png
 
 
 
