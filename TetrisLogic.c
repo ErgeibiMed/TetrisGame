@@ -1,4 +1,4 @@
-#include "blocks.h"
+#include "TetrisLogic.h"
 #include "raylib.h"
 #include <stddef.h>
 #include <stdio.h>
@@ -21,6 +21,53 @@ All_Recs_t *allocAllPieces(void) {
 
   return all_pieces;
 }
+
+ScoreBord_t *creat_score(void) {
+  ScoreBord_t *score = malloc(sizeof(ScoreBord_t));
+  if (score != NULL) {
+    score->text = "SCORE";
+    score->score = "000000";
+    score->area_color = GRAY;
+    //
+    score->score_upper_right_pt.x = GetScreenWidth() - 4 * BLOCK_SIZE;
+    score->score_upper_right_pt.y = 4 * BLOCK_SIZE;
+    //
+    score->score_upper_left_pt.x =
+        GetScreenWidth() - 4 * BLOCK_SIZE - 8 * BLOCK_SIZE;
+    score->score_upper_left_pt.y = 4 * BLOCK_SIZE;
+    //
+    score->score_down_right_pt.x = GetScreenWidth() - 4 * BLOCK_SIZE;
+    score->score_down_right_pt.y = 4 * BLOCK_SIZE + 8 * BLOCK_SIZE;
+    //
+    score->score_down_left_pt.x =
+        GetScreenWidth() - 4 * BLOCK_SIZE - 8 * BLOCK_SIZE;
+    score->score_down_left_pt.y = 4 * BLOCK_SIZE + 8 * BLOCK_SIZE;
+  }
+  return score;
+}
+void draw_score(ScoreBord_t *score) {
+  Vector2 text_pos = {
+      .x = score->score_upper_left_pt.x + 2 * BLOCK_SIZE,
+      .y = (score->score_upper_left_pt.y + score->score_down_left_pt.y) * 0.5 -
+           2.0 * BLOCK_SIZE};
+
+  DrawText(score->text, text_pos.x, text_pos.y, 5, WHITE);
+  //////
+  Vector2 score_pos = {.x = text_pos.x, .y = text_pos.y + 3 * BLOCK_SIZE};
+  DrawText(score->score, score_pos.x, score_pos.y, 5, WHITE);
+  ///////
+  float thick = 5.0;
+  DrawLineEx(score->score_upper_left_pt, score->score_upper_right_pt, thick,
+             score->area_color);
+  DrawLineEx(score->score_down_left_pt, score->score_down_right_pt, thick,
+             score->area_color);
+  DrawLineEx(score->score_upper_right_pt, score->score_down_right_pt, thick,
+             score->area_color);
+
+  DrawLineEx(score->score_upper_left_pt, score->score_down_left_pt, thick,
+             score->area_color);
+}
+void free_score(ScoreBord_t *score) { free(score); }
 
 void create_piece(piece_t *piece) {
   Vector2 initial_pos = {.x = GetScreenWidth() / 2.0, .y = 0.0};
@@ -152,7 +199,7 @@ bool update_piece_pos(piece_t *piece, KeyboardKey key, float speed) {
       closest_to_floor = piece->block[j].y;
     }
   }
-  bool reached_floor = (closest_to_floor == (GetScreenHeight() - BLOCK_SIZE));
+  bool reached_floor = (closest_to_floor > (GetScreenHeight() - BLOCK_SIZE));
 
   bool reached_left_border =
       (closest_to_left_border - BLOCK_SIZE / 10.0) < EPSILON;
@@ -172,15 +219,15 @@ bool update_piece_pos(piece_t *piece, KeyboardKey key, float speed) {
     return true;
   } else {
     if (key == KEY_DOWN) {
-      piece->block[0].y += (BLOCK_SIZE * 2 * speed);
-      piece->block[1].y += (BLOCK_SIZE * 2 * speed);
-      piece->block[2].y += (BLOCK_SIZE * 2 * speed);
-      piece->block[3].y += (BLOCK_SIZE * 2 * speed);
+      piece->block[0].y += 2 * speed;
+      piece->block[1].y += 2 * speed;
+      piece->block[2].y += 2 * speed;
+      piece->block[3].y += 2 * speed;
     } else {
-      piece->block[0].y += (BLOCK_SIZE * speed);
-      piece->block[1].y += (BLOCK_SIZE * speed);
-      piece->block[2].y += (BLOCK_SIZE * speed);
-      piece->block[3].y += (BLOCK_SIZE * speed);
+      piece->block[0].y += speed;
+      piece->block[1].y += speed;
+      piece->block[2].y += speed;
+      piece->block[3].y += speed;
     }
   }
 
@@ -188,18 +235,18 @@ bool update_piece_pos(piece_t *piece, KeyboardKey key, float speed) {
   if (key == KEY_LEFT) {
     if (!reached_left_border) {
       // move piece to the left
-      piece->block[0].x -= (BLOCK_SIZE * speed);
-      piece->block[1].x -= (BLOCK_SIZE * speed);
-      piece->block[2].x -= (BLOCK_SIZE * speed);
-      piece->block[3].x -= (BLOCK_SIZE * speed);
+      piece->block[0].x -= speed;
+      piece->block[1].x -= speed;
+      piece->block[2].x -= speed;
+      piece->block[3].x -= speed;
     }
   } // move piece to the right logic
   if (key == KEY_RIGHT) {
     if (!reached_right_border) {
-      piece->block[0].x += (BLOCK_SIZE * speed);
-      piece->block[1].x += (BLOCK_SIZE * speed);
-      piece->block[2].x += (BLOCK_SIZE * speed);
-      piece->block[3].x += (BLOCK_SIZE * speed);
+      piece->block[0].x += speed;
+      piece->block[1].x += speed;
+      piece->block[2].x += speed;
+      piece->block[3].x += speed;
     }
   }
   return false;
