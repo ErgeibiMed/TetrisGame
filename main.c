@@ -28,10 +28,6 @@ int main(void) {
     if (piece != NULL) {
       draw_piece(piece);
       KeyboardKey key = GetKeyPressed();
-      // printf("INFO : KEY PRESSED IS : %s\n", GetKeyName(key));
-      printf("----------------------------------------------\n");
-      printf("INFO : KEY PRESSED IS : %d\n", key);
-      printf("----------------------------------------------\n");
       bool reached_floor = update_piece_pos(piece, key, 0.1);
       if (reached_floor == true) {
         for (size_t i = all_recs->len; i < all_recs->len + 4; i++) {

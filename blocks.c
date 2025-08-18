@@ -139,16 +139,16 @@ void create_piece(piece_t *piece) {
 
 bool update_piece_pos(piece_t *piece, KeyboardKey key, float speed) {
   float closest_to_floor = piece->block[0].y;
-  float closest_to_right_brder = piece->block[0].x;
+  float closest_to_right_border = piece->block[0].x;
   float closest_to_left_border = piece->block[0].x;
   for (size_t j = 0; j < 4; j++) {
-    if (piece->block[j].x > closest_to_right_brder) {
-      closest_to_right_brder = piece->block[j].x;
+    if (piece->block[j].x >= closest_to_right_border) {
+      closest_to_right_border = piece->block[j].x;
     }
-    if (piece->block[j].x < closest_to_left_border) {
+    if (piece->block[j].x <= closest_to_left_border) {
       closest_to_left_border = piece->block[j].x;
     }
-    if (piece->block[j].y > closest_to_floor) {
+    if (piece->block[j].y >= closest_to_floor) {
       closest_to_floor = piece->block[j].y;
     }
   }
@@ -156,9 +156,12 @@ bool update_piece_pos(piece_t *piece, KeyboardKey key, float speed) {
 
   bool reached_left_border =
       (closest_to_left_border - BLOCK_SIZE / 10.0) < EPSILON;
-  bool reached_right_border =
-      (closest_to_right_brder - (GetScreenWidth() - BLOCK_SIZE / 10.0)) <
-      EPSILON;
+  // bool reached_right_border =
+  //     (closest_to_right_border -
+  //          1.0 * (GetScreenWidth() - (BLOCK_SIZE / 10.0)) <
+  //      EPSILON);
+  bool reached_right_border = (GetScreenWidth() - (1.0 * BLOCK_SIZE / 10.0) -
+                               closest_to_right_border) < EPSILON;
   // update piece pos
   //
   // KEY_RIGHT           = 262,      // Key: Cursor right
