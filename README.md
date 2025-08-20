@@ -3,7 +3,8 @@
 
 
 ## Progess So Far
-![Progress](https://github.com/ErgeibiMed/TetrisGame/blob/main/ProgressSoFar.png)
+![Progress](https://github.com/ErgeibiMed/TetrisGame/blob/main/progresspng/ProgressSoFar00.png)
+![Progress](https://github.com/ErgeibiMed/TetrisGame/blob/main/progresspng/ProgressSoFar01.png)
 
 
 # Licenses

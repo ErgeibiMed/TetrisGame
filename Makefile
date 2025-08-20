@@ -6,7 +6,7 @@ LIBS:=  -lm
 
 RAYLIB:= -I$(HOME)/raylib/src/ -L$(HOME)/raylib/src/  -l:libraylib.a 
 
-INPUT:=main.c TetrisLogic.c
+INPUT:=src/main.c src/TetrisLogic.c src/BorderLogic.c
 
 BUILD_DIR:= build
 

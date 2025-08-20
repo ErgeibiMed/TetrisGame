@@ -1,3 +1,4 @@
+#include "BorderLogic.h"
 #include "TetrisLogic.h"
 #include "raylib.h"
 #include <stddef.h>
@@ -13,20 +14,26 @@ int main(void) {
 
   srand(time(NULL));
 
-  // SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "TETRIS GAME");
+  //  SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   SetTargetFPS(60);
   All_Recs_t *all_recs = allocAllPieces();
-  piece_t *piece = NULL;
   ScoreBord_t *score = creat_score();
+  PiecePreviewer_t *Pice_prvw = create_preview();
+  Border_t *border = create_border();
+  piece_t *piece = NULL;
   while (!WindowShouldClose()) {
     BeginDrawing();
     ClearBackground(BLACK);
     //////////////////////:
     draw_score(score);
+    draw_preview(Pice_prvw);
+    draw_border(border);
+    ///////////////////
     if (piece == NULL) {
       piece = malloc(sizeof(piece_t));
-      create_piece(piece);
+      bool for_preview = false;
+      *piece = create_piece(for_preview);
     }
     if (piece != NULL) {
       draw_piece(piece);
@@ -63,6 +70,8 @@ int main(void) {
   }
 
   free(score);
+  free_preview(Pice_prvw);
+  free_border(border);
   free_All_pieces(all_recs);
 
   CloseWindow();
