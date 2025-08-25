@@ -1,5 +1,4 @@
-#include "BorderLogic.h"
-#include "TetrisLogic.h"
+#include "TetrisCommon.h"
 #include "raylib.h"
 #include <stddef.h>
 #include <stdio.h>
@@ -8,7 +7,7 @@
 
 #define SCREEN_WIDTH 500
 #define SCREEN_HEIGHT 500
-#define LEVEL 10
+#define LEVEL 1
 
 int main(void) {
 
@@ -18,8 +17,8 @@ int main(void) {
   //  SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   SetTargetFPS(60);
   All_Recs_t *all_recs = allocAllPieces();
-  ScoreBord_t *score = creat_score();
-  PiecePreviewer_t *Pice_prvw = create_preview();
+  ScoreBord_t *score = create_score();
+  PiecePreviewer_t *Piece_prvw = create_preview();
   Border_t *border = create_border();
   piece_t *piece = NULL;
   while (!WindowShouldClose()) {
@@ -27,24 +26,25 @@ int main(void) {
     ClearBackground(BLACK);
     //////////////////////:
     draw_score(score);
-    draw_preview(Pice_prvw);
+    draw_preview(Piece_prvw);
     draw_border(border);
     ///////////////////
+    bool piece_isNot_freed = true;
     if (piece == NULL) {
       piece = malloc(sizeof(piece_t));
-      bool for_preview = false;
-      *piece = create_piece(for_preview);
+      Vector2 init_pos = {.x = GetScreenWidth() * 0.4, .y = 0};
+      *piece = create_piece_at_pos(init_pos, Piece_prvw->piece.piece_name);
+      piece_name p_n = (piece_name)(rand() % 7); // THE number of pieces is 7;
+      ///////////////// ** UPDATE PREVIEW  **      ////////////////
+      Vector2 init_pos_for_preview = {.x = Piece_prvw->piece.block[0].x,
+                                      .y = Piece_prvw->piece.block[0].y};
+      Piece_prvw->piece = create_piece_at_pos(init_pos_for_preview, p_n);
+      ///////////////// ** UPDATE PREVIEW  **      ////////////////
     }
     if (piece != NULL) {
       draw_piece(piece);
       KeyboardKey key = GetKeyPressed();
-      float speed = 0;
-      if (IsKeyPressed(key)) {
-        speed = BLOCK_SIZE;
-      } else {
-        speed = LEVEL * BLOCK_SIZE * GetFrameTime();
-      }
-      bool reached_floor = update_piece_pos(piece, key, speed);
+      bool reached_floor = update_piece_pos(piece, key, border, all_recs);
       if (reached_floor == true) {
         for (size_t i = all_recs->len; i < all_recs->len + 4; i++) {
           all_recs->all[i]->rec = piece->block[i - all_recs->len];
@@ -52,6 +52,8 @@ int main(void) {
         }
         all_recs->len += 4; // each pice is consiting of four rectangles
         free(piece);
+        piece_isNot_freed = false;
+
         piece = NULL;
       }
     }
@@ -61,16 +63,19 @@ int main(void) {
         Color clr = (all_recs->all[k]->color);
         DrawRectangleRec(rec, clr);
       }
-      if (IsKeyPressed(KEY_G)) {
-        printf("KEY_G Pressed: application is shutting down\n");
-        break;
+    }
+    if (IsKeyPressed(KEY_G)) {
+      printf("KEY_G Pressed: application is shutting down\n");
+      if (piece_isNot_freed == true) {
+        free(piece);
       }
+      break;
     }
     EndDrawing();
   }
 
   free(score);
-  free_preview(Pice_prvw);
+  free_preview(Piece_prvw);
   free_border(border);
   free_All_pieces(all_recs);
 

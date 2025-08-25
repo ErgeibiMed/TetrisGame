@@ -1,5 +1,4 @@
-#include "BorderLogic.h"
-#include "TetrisLogic.h"
+#include "TetrisCommon.h"
 #include "raylib.h"
 #include <stdlib.h>
 
@@ -27,15 +26,21 @@ PiecePreviewer_t *create_preview(void) {
   p_prvw->prvw_down_left_pt.x = p_prvw->prvw_upper_left_pt.x;
   p_prvw->prvw_down_left_pt.y =
       p_prvw->prvw_upper_left_pt.y + Preview_Window_SIZE;
-  p_prvw->piece = create_piece(true);
+  Vector2 init_pos = {
+      .x = p_prvw->prvw_upper_left_pt.x + Preview_Window_SIZE * 0.5,
+      .y = p_prvw->prvw_upper_left_pt.y + Preview_Window_SIZE * 0.5};
+
+  piece_name p_n = (rand() % 7); // THE number of pieces is 7
+  p_prvw->piece = create_piece_at_pos(init_pos, p_n);
   return p_prvw;
 }
 void draw_preview(PiecePreviewer_t *preview) {
   Vector2 text_pos = {
       .x = preview->prvw_upper_left_pt.x + 1.5 * BLOCK_SIZE,
       .y =
-          (preview->prvw_upper_left_pt.y + preview->prvw_down_left_pt.y) * 0.5 -
-          3.0 * BLOCK_SIZE};
+          preview->prvw_upper_left_pt.y +
+          (preview->prvw_down_left_pt.y - preview->prvw_upper_left_pt.y) * 0.5 -
+          3.5 * BLOCK_SIZE};
 
   DrawText(preview->text, text_pos.x, text_pos.y, 5, WHITE);
   //////
@@ -57,7 +62,7 @@ void draw_preview(PiecePreviewer_t *preview) {
 void free_preview(PiecePreviewer_t *preview) { free(preview); }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// SCORE BORD STUFF
-ScoreBord_t *creat_score(void) {
+ScoreBord_t *create_score(void) {
   ScoreBord_t *score = malloc(sizeof(ScoreBord_t));
   if (score != NULL) {
     score->text = "SCORE";
@@ -111,30 +116,27 @@ Border_t *create_border(void) {
 
   border->border_color = LIGHTGRAY;
   //
-  border->border_upper_right_pt.x =
-      0.96 * GetScreenWidth() - Preview_Window_SIZE - 2 * BLOCK_SIZE;
-  border->border_upper_right_pt.y = 0.0;
-  //
-  border->border_upper_left_pt.x = 0.0;
-  border->border_upper_left_pt.y = 0.0;
-  //
-  border->border_down_right_pt.x =
-      0.96 * GetScreenWidth() - Preview_Window_SIZE - 2 * BLOCK_SIZE;
-  border->border_down_right_pt.y = GetScreenHeight();
-  //
-  border->border_down_left_pt.x = 0.0;
-  border->border_down_left_pt.y = GetScreenHeight();
+
+  border->left_border = (Rectangle){
+      .x = 0.0, .y = 0.0, .width = BLOCK_SIZE, .height = GetScreenHeight()};
+  border->right_border = (Rectangle){.x = 0.96 * GetScreenWidth() -
+                                          Preview_Window_SIZE - 2 * BLOCK_SIZE,
+                                     .y = 0.0,
+                                     .width = BLOCK_SIZE,
+                                     .height = GetScreenHeight()};
+
+  border->down_border =
+      (Rectangle){.x = BLOCK_SIZE,
+                  .y = GetScreenHeight() - BLOCK_SIZE,
+                  .width = 0.96 * GetScreenWidth() - Preview_Window_SIZE -
+                           2 * BLOCK_SIZE - BLOCK_SIZE,
+                  .height = BLOCK_SIZE};
   return border;
 }
 void draw_border(Border_t *border) {
 
-  float thick = 10.0;
-  DrawLineEx(border->border_down_left_pt, border->border_down_right_pt, thick,
-             border->border_color);
-  DrawLineEx(border->border_upper_right_pt, border->border_down_right_pt, thick,
-             border->border_color);
-
-  DrawLineEx(border->border_upper_left_pt, border->border_down_left_pt, thick,
-             border->border_color);
+  DrawRectangleRec(border->left_border, border->border_color);
+  DrawRectangleRec(border->right_border, border->border_color);
+  DrawRectangleRec(border->down_border, border->border_color);
 }
 void free_border(Border_t *border) { free(border); }

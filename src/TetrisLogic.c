@@ -1,4 +1,4 @@
-#include "TetrisLogic.h"
+#include "TetrisCommon.h"
 #include "raylib.h"
 #include <stddef.h>
 #include <stdio.h>
@@ -22,18 +22,15 @@ All_Recs_t *allocAllPieces(void) {
   return all_pieces;
 }
 //////
-piece_t create_piece(bool for_prvw) {
-  Vector2 initial_pos;
-  if (for_prvw == true) {
-    float x = 0.95 * GetScreenWidth() - Preview_Window_SIZE + 4 * BLOCK_SIZE;
-    float y = 0.20 * GetScreenWidth() + 3 * BLOCK_SIZE;
-    initial_pos = (Vector2){x, y};
-  } else {
-    initial_pos = (Vector2){.x = GetScreenWidth() / 2.0, .y = 0.0};
-  }
-  enum piece_name p_n = (rand() % 7); // THE number of pieces is 7
+piece_t create_piece_at_pos(Vector2 initial_pos, piece_name p_n) {
+  // Vector2 initial_pos;
+  ////  if (for_prvw == true) {
+  ////    float x = 0.95 * GetScreenWidth() - Preview_Window_SIZE + 4 *
+  ////    BLOCK_SIZE; float y = 0.20 * GetScreenWidth() + 3 * BLOCK_SIZE;
+  ////    initial_pos = (Vector2){x, y};
+  ////  } else {
+  // initial_pos = (Vector2){.x = GetScreenWidth() / 2.0, .y = 0.0};
   piece_t piece;
-  piece.active = false;
   piece.piece_name = p_n;
   piece.block[0].x = initial_pos.x;
   piece.block[0].y = initial_pos.y;
@@ -83,29 +80,29 @@ piece_t create_piece(bool for_prvw) {
     break;
   case L_left:
     piece.dir = LEFT;
-    // block[1] is on the right of block[0]
-    piece.block[1].x = piece.block[0].x + BLOCK_SIZE;
-    piece.block[1].y = piece.block[0].y;
-    // block[2] is on top of block[1]
+    // block[1] is under of block[0]
+    piece.block[1].x = piece.block[0].x;
+    piece.block[1].y = piece.block[0].y + BLOCK_SIZE;
+    // block[2] is under of block[1]
     piece.block[2].x = piece.block[1].x;
-    piece.block[2].y = piece.block[1].y - BLOCK_SIZE;
-    // block[3] is on the top of block[2]
-    piece.block[3].x = piece.block[2].x;
-    piece.block[3].y = piece.block[2].y - BLOCK_SIZE;
+    piece.block[2].y = piece.block[1].y + BLOCK_SIZE;
+    // block[3] is on the left of block[2]
+    piece.block[3].x = piece.block[2].x - BLOCK_SIZE;
+    piece.block[3].y = piece.block[2].y;
     // each pice has a color
     piece.p_color = YELLOW;
     break;
   case L_right:
     piece.dir = RIGHT;
-    // block[1] is on the left block[0]
-    piece.block[1].x = piece.block[0].x - BLOCK_SIZE;
-    piece.block[1].y = piece.block[0].y;
-    // block[2] is on top of block[1]
+    // block[1] is under block[0]
+    piece.block[1].x = piece.block[0].x;
+    piece.block[1].y = piece.block[0].y + BLOCK_SIZE;
+    // block[2] is under of block[1]
     piece.block[2].x = piece.block[1].x;
-    piece.block[2].y = piece.block[1].y - BLOCK_SIZE;
+    piece.block[2].y = piece.block[1].y + BLOCK_SIZE;
     // block[3] is on top of block[2]
-    piece.block[3].x = piece.block[2].x;
-    piece.block[3].y = piece.block[2].y - BLOCK_SIZE;
+    piece.block[3].x = piece.block[2].x + BLOCK_SIZE;
+    piece.block[3].y = piece.block[2].y;
     // each pice has a color
     piece.p_color = ORANGE;
     break;
@@ -115,8 +112,8 @@ piece_t create_piece(bool for_prvw) {
     piece.block[1].x = piece.block[0].x + BLOCK_SIZE;
     piece.block[1].y = piece.block[0].y;
     // block[2] is under block[1]
-    piece.block[2].x = piece.block[0].x;
-    piece.block[2].y = piece.block[0].y + BLOCK_SIZE;
+    piece.block[2].x = piece.block[1].x;
+    piece.block[2].y = piece.block[1].y + BLOCK_SIZE;
     // block[3] is on the right of block[2]
     piece.block[3].x = piece.block[2].x + BLOCK_SIZE;
     piece.block[3].y = piece.block[2].y;
@@ -129,8 +126,8 @@ piece_t create_piece(bool for_prvw) {
     piece.block[1].x = piece.block[0].x - BLOCK_SIZE;
     piece.block[1].y = piece.block[0].y;
     // block[2] is under block[1]
-    piece.block[2].x = piece.block[0].x;
-    piece.block[2].y = piece.block[0].y + BLOCK_SIZE;
+    piece.block[2].x = piece.block[1].x;
+    piece.block[2].y = piece.block[1].y + BLOCK_SIZE;
     // block[3] is on the left of block[2]
     piece.block[3].x = piece.block[2].x - BLOCK_SIZE;
     piece.block[3].y = piece.block[2].y;
@@ -146,85 +143,119 @@ piece_t create_piece(bool for_prvw) {
   return piece;
 }
 
-bool update_piece_pos(piece_t *piece, KeyboardKey key, float speed) {
+size_t get_index_block_closest_to_floor(piece_t *piece) {
+
   float closest_to_floor = piece->block[0].y;
-  float closest_to_right_border = piece->block[0].x;
-  float closest_to_left_border = piece->block[0].x;
-  size_t left = 0;
-  size_t right = 0;
   size_t down = 0;
+
   for (size_t j = 0; j < 4; j++) {
-    if (piece->block[j].x >= closest_to_right_border) {
-      closest_to_right_border = piece->block[j].x;
-      right = j;
-    }
-    if (piece->block[j].x <= closest_to_left_border) {
-      closest_to_left_border = piece->block[j].x;
-      left = j;
-    }
     if (piece->block[j].y >= closest_to_floor) {
       down = j;
       closest_to_floor = piece->block[j].y;
     }
   }
-  ////
-  Rectangle rec_floor = {.x = 0.0,
-                         .y = GetScreenHeight() - BLOCK_SIZE,
-                         .height = BLOCK_SIZE,
-                         .width = 0.96 * GetScreenWidth() - 9 * BLOCK_SIZE -
-                                  2 * BLOCK_SIZE};
-  // 0.96 * GetScreenWidth() - Preview_Window_SIZE - 2 * BLOCK_SIZE;
-  // Preview_Window_SIZE =9*BLOCK_SIZE
-  bool reached_floor = CheckCollisionRecs(rec_floor, piece->block[down]);
-  //
-  //
-  Rectangle rec_left = {
-      .x = 0.0, .y = 0.0, .height = GetScreenHeight(), .width = BLOCK_SIZE};
-  bool reached_left_border = CheckCollisionRecs(rec_left, piece->block[left]);
-  ///
-  ///
-  ///
-  Rectangle rec_right = {.x = 0.96 * GetScreenWidth() - 9 * BLOCK_SIZE -
-                              3 * BLOCK_SIZE,
-                         .y = 0.0,
-                         .height = GetScreenHeight(),
-                         .width = BLOCK_SIZE};
-  bool reached_right_border =
-      CheckCollisionRecs(rec_right, piece->block[right]);
+  return down;
+}
+
+size_t get_index_block_closest_to_left_border(piece_t *piece) {
+
+  size_t left = 0;
+  float closest_to_left_border = piece->block[0].x;
+
+  for (size_t j = 0; j < 4; j++) {
+
+    if (piece->block[j].x <= closest_to_left_border) {
+      closest_to_left_border = piece->block[j].x;
+      left = j;
+    }
+  }
+  return left;
+}
+
+size_t get_index_block_closest_to_right_border(piece_t *piece) {
+  size_t right = 0;
+  float closest_to_right_border = piece->block[0].x;
+  for (size_t j = 0; j < 4; j++) {
+    if (piece->block[j].x >= closest_to_right_border) {
+      closest_to_right_border = piece->block[j].x;
+      right = j;
+    }
+  }
+  return right;
+}
+
+Collided_With
+check_collision_with_border_or_another_piece(piece_t *piece, Border_t *border,
+                                             All_Recs_t *All_recs) {
+
+  size_t left = get_index_block_closest_to_left_border(piece);
+  size_t right = get_index_block_closest_to_right_border(piece);
+  size_t down = get_index_block_closest_to_floor(piece);
+  if (CheckCollisionRecs(border->down_border, piece->block[down])) {
+    return DOWN_BORDER;
+  }
+  if (CheckCollisionRecs(border->left_border, piece->block[left])) {
+    return LEFT_BORDER;
+  }
+  if (CheckCollisionRecs(border->right_border, piece->block[right])) {
+    return RIGHT_BORDER;
+  }
+  for (size_t i = 0; i < All_recs->len; i++) {
+    if (CheckCollisionRecs(All_recs->all[i]->rec, piece->block[down]) ||
+        CheckCollisionRecs(All_recs->all[i]->rec, piece->block[right]) ||
+        CheckCollisionRecs(All_recs->all[i]->rec, piece->block[left])) {
+      return ANOTHER_PIECE;
+    }
+  }
+
+  return NOTHING;
+}
+
+bool update_piece_pos(piece_t *piece, KeyboardKey key, Border_t *border,
+                      All_Recs_t *All_recs) {
   // update piece pos
   //
   // KEY_RIGHT           = 262,      // Key: Cursor right
   // KEY_LEFT            = 263,      // Key: Cursor left
   // KEY_DOWN            = 264,      // Key: Cursor down
   // KEY_UP              = 265,      // Key: Cursor up
-  if (reached_floor == true) {
+
+  Collided_With collision_with_border_or_another_piece =
+      check_collision_with_border_or_another_piece(piece, border, All_recs);
+  float speed = GetFrameTime() * BLOCK_SIZE * 20;
+
+  if (collision_with_border_or_another_piece == DOWN_BORDER) {
     return true;
-  } else {
+  }
+
+  if (collision_with_border_or_another_piece == ANOTHER_PIECE) {
+    return true;
+  }
+
+  if (collision_with_border_or_another_piece != DOWN_BORDER) {
+    piece->block[0].y += 0.5 * speed;
+    piece->block[1].y += 0.5 * speed;
+    piece->block[2].y += 0.5 * speed;
+    piece->block[3].y += 0.5 * speed;
     if (key == KEY_DOWN) {
-      piece->block[0].y += 2 * speed;
-      piece->block[1].y += 2 * speed;
-      piece->block[2].y += 2 * speed;
-      piece->block[3].y += 2 * speed;
-    } else {
       piece->block[0].y += speed;
       piece->block[1].y += speed;
       piece->block[2].y += speed;
       piece->block[3].y += speed;
     }
   }
-
-  // move piece to the left logic
   if (key == KEY_LEFT) {
-    if (!reached_left_border) {
-      // move piece to the left
+    // move piece to the left
+    if (collision_with_border_or_another_piece != LEFT_BORDER) {
       piece->block[0].x -= speed;
       piece->block[1].x -= speed;
       piece->block[2].x -= speed;
       piece->block[3].x -= speed;
     }
-  } // move piece to the right logic
+  }
+  // move piece to the right logic
   if (key == KEY_RIGHT) {
-    if (!reached_right_border) {
+    if (collision_with_border_or_another_piece != RIGHT_BORDER) {
       piece->block[0].x += speed;
       piece->block[1].x += speed;
       piece->block[2].x += speed;
