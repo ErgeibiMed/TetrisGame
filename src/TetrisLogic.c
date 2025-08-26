@@ -211,8 +211,95 @@ check_collision_with_border_or_another_piece(piece_t *piece, Border_t *border,
   return NOTHING;
 }
 
-bool update_piece_pos(piece_t *piece, KeyboardKey key, Border_t *border,
-                      All_Recs_t *All_recs) {
+void rotate_piece_UpToLeft(piece_t *piece) {
+  piece->dir = LEFT;
+  switch (piece->piece_name) {
+  case T:
+    // block[0] is on the left of block[1]
+    piece->block[0].x = piece->block[1].x - BLOCK_SIZE;
+    piece->block[0].y = piece->block[1].y;
+    // block[1]
+    /*nop*/ ////////////
+            // block[2] is under  block[1]
+    piece->block[2].x = piece->block[1].x;
+    piece->block[2].y = piece->block[1].y + BLOCK_SIZE;
+    // block[3] is on top of block[1]
+    piece->block[3].x = piece->block[1].x;
+    piece->block[3].y = piece->block[1].y - BLOCK_SIZE;
+    break;
+
+  case Square:
+    // do nothing for square/////
+    break;
+  case Stick:
+    // block[0]///
+    piece->block[0].x = piece->block[3].x - 3 * BLOCK_SIZE;
+    piece->block[0].y = piece->block[3].y;
+    // block[1] is on the right of block[0]
+    piece->block[1].x = piece->block[0].x + BLOCK_SIZE;
+    piece->block[1].y = piece->block[0].y;
+    // block[2] is on the right of block[1]
+    piece->block[2].x = piece->block[1].x + BLOCK_SIZE;
+    piece->block[2].y = piece->block[1].y;
+    // block[3] NO_OP
+    break;
+  case L_left:
+
+    // block[0] on the left of block[2]*2BLock_size
+    piece->block[0].x = piece->block[2].x - 2 * BLOCK_SIZE;
+    piece->block[0].y = piece->block[2].y;
+    // block[1] is on the right of block[0]
+    piece->block[1].x = piece->block[0].x + BLOCK_SIZE;
+    piece->block[1].y = piece->block[0].y;
+    // block[2] NO_OP
+    // block[3] is under block[2]
+    piece->block[3].x = piece->block[2].x;
+    piece->block[3].y = piece->block[2].y + BLOCK_SIZE;
+    break;
+  case L_right:
+    // block[0] on the right of block[2]*2BLock_size
+    piece->block[0].x = piece->block[2].x - 2 * BLOCK_SIZE;
+    piece->block[0].y = piece->block[2].y;
+    // block[1] is on the right of block[0]
+    piece->block[1].x = piece->block[0].x + BLOCK_SIZE;
+    piece->block[1].y = piece->block[0].y;
+    // block[2] NO_OP
+    // block[3] is under block[2]
+    piece->block[3].x = piece->block[2].x;
+    piece->block[3].y = piece->block[2].y - BLOCK_SIZE;
+    break;
+  case Dog_left:
+
+    // block[1] become block[0]
+    piece->block[1].x = piece->block[0].x;
+    piece->block[1].y = piece->block[0].y;
+    // block[0] is under  block[1]
+    piece->block[0].x = piece->block[1].x;
+    piece->block[0].y = piece->block[1].y + BLOCK_SIZE;
+    //->block[2] is on the right of under->block[1]
+    piece->block[2].x = piece->block[1].x + BLOCK_SIZE;
+    piece->block[2].y = piece->block[1].y;
+    //->block[3] is on top of->block[2]
+    piece->block[3].x = piece->block[2].x;
+    piece->block[3].y = piece->block[2].y - BLOCK_SIZE;
+    break;
+  case Dog_right:
+    // block[0] is on top of block[1]
+    piece->block[0].x = piece->block[1].x;
+    piece->block[0].y = piece->block[1].y - BLOCK_SIZE;
+    // block[1] NO_OP////
+    //->block[2] is on the left of ->block[1]
+    piece->block[2].x = piece->block[1].x - BLOCK_SIZE;
+    piece->block[2].y = piece->block[1].y;
+    //->block[3] is under ->block[2]
+    piece->block[3].x = piece->block[2].x;
+    piece->block[3].y = piece->block[2].y + BLOCK_SIZE;
+    break;
+  }
+}
+
+bool update_piece(piece_t *piece, KeyboardKey key, Border_t *border,
+                  All_Recs_t *All_recs) {
   // update piece pos
   //
   // KEY_RIGHT           = 262,      // Key: Cursor right
@@ -222,7 +309,6 @@ bool update_piece_pos(piece_t *piece, KeyboardKey key, Border_t *border,
 
   Collided_With collision_with_border_or_another_piece =
       check_collision_with_border_or_another_piece(piece, border, All_recs);
-  float speed = GetFrameTime() * BLOCK_SIZE * 20;
 
   if (collision_with_border_or_another_piece == DOWN_BORDER) {
     return true;
@@ -232,11 +318,16 @@ bool update_piece_pos(piece_t *piece, KeyboardKey key, Border_t *border,
     return true;
   }
 
+  float speed = GetFrameTime() * BLOCK_SIZE * 30;
   if (collision_with_border_or_another_piece != DOWN_BORDER) {
-    piece->block[0].y += 0.5 * speed;
-    piece->block[1].y += 0.5 * speed;
-    piece->block[2].y += 0.5 * speed;
-    piece->block[3].y += 0.5 * speed;
+    piece->block[0].y += 0.20 * speed;
+    piece->block[1].y += 0.20 * speed;
+    piece->block[2].y += 0.20 * speed;
+    piece->block[3].y += 0.20 * speed;
+    if (key == KEY_UP) {
+      rotate_piece_UpToLeft(piece);
+      return false;
+    }
     if (key == KEY_DOWN) {
       piece->block[0].y += speed;
       piece->block[1].y += speed;

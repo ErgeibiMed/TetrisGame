@@ -44,7 +44,7 @@ int main(void) {
     if (piece != NULL) {
       draw_piece(piece);
       KeyboardKey key = GetKeyPressed();
-      bool reached_floor = update_piece_pos(piece, key, border, all_recs);
+      bool reached_floor = update_piece(piece, key, border, all_recs);
       if (reached_floor == true) {
         for (size_t i = all_recs->len; i < all_recs->len + 4; i++) {
           all_recs->all[i]->rec = piece->block[i - all_recs->len];
