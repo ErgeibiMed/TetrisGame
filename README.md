@@ -3,7 +3,8 @@
 
 
 ## Progess
-###The progrees is can be seing in the folder [progresspng]((https://github.com/ErgeibiMed/TetrisGame/blob/main/progresspng)
+
+### The progrees is can be seing in the folder [progresspng](https://github.com/ErgeibiMed/TetrisGame/blob/main/progresspng)
 
 ### Progess04
 ![Progress04](https://github.com/ErgeibiMed/TetrisGame/blob/main/progresspng/ProgressSoFar04.png)
