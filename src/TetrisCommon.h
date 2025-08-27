@@ -63,6 +63,7 @@ void free_All_pieces(All_Recs_t *all_pieces);
 piece_t create_piece_at_pos(Vector2 initial_pos, piece_name p_n);
 void rotate_piece_UpToLeft(piece_t *piece);
 void rotate_piece_LeftToDown(piece_t *piece);
+void rotate_piece_DownToRight(piece_t *piece);
 void draw_piece(piece_t *piece);
 ///
 
