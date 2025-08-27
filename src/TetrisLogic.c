@@ -464,6 +464,91 @@ void rotate_piece_DownToRight(piece_t *piece) {
     break;
   }
 }
+void rotate_piece_RightToUp(piece_t *piece) {
+  piece->dir = UP;
+  switch (piece->piece_name) {
+  case T:
+    // block[3] become  block[0] or under block[1]
+    piece->block[3].x = piece->block[0].x;
+    piece->block[3].y = piece->block[0].y;
+    // block[0] is on top of block[1] or the old block[2]
+    piece->block[0].x = piece->block[2].x;
+    piece->block[0].y = piece->block[2].y;
+    // block[1]
+    /*nop*/ ////////////
+            // block[2] is on left of block[1]
+    piece->block[2].x = piece->block[1].x - BLOCK_SIZE;
+    piece->block[2].y = piece->block[1].y;
+    break;
+  case Square:
+    // do nothing for square/////
+    break;
+  case Stick:
+    // block[3] NO_OP
+    // block[2]
+    piece->block[2].x = piece->block[3].x;
+    piece->block[2].y = piece->block[3].y - BLOCK_SIZE;
+    // block[1]
+    piece->block[1].x = piece->block[2].x;
+    piece->block[1].y = piece->block[2].y - BLOCK_SIZE;
+    // block[0]/// on
+    piece->block[0].x = piece->block[1].x;
+    piece->block[0].y = piece->block[1].y - BLOCK_SIZE;
+    break;
+  case L_left:
+    // block[2] NO_OP
+    // block[1] is on top of block[2]
+    piece->block[1].x = piece->block[2].x;
+    piece->block[1].y = piece->block[2].y - BLOCK_SIZE;
+    // block[0] is on top of block[1]
+    piece->block[0].x = piece->block[1].x;
+    piece->block[0].y = piece->block[1].y - BLOCK_SIZE;
+    // block[3] is on the left of block[2]
+    piece->block[3].x = piece->block[2].x - BLOCK_SIZE;
+    piece->block[3].y = piece->block[2].y;
+    break;
+  case L_right:
+    // block[3] noop
+    // block[2] is on the left of block[1]
+    piece->block[2].x = piece->block[3].x - BLOCK_SIZE;
+    piece->block[2].y = piece->block[3].y;
+    // block[1] is on top of block[2]
+    piece->block[1].x = piece->block[2].x;
+    piece->block[1].y = piece->block[2].y - BLOCK_SIZE;
+    // block[0]  is on top of block[1]
+    piece->block[0].x = piece->block[1].x;
+    piece->block[0].y = piece->block[1].y - BLOCK_SIZE;
+    break;
+  case Dog_left:
+    //->block[0] become ->block[2]
+    piece->block[0].x = piece->block[2].x;
+    piece->block[0].y = piece->block[2].y;
+    // block[1] on the right of block[0]
+    piece->block[1].x = piece->block[0].x + BLOCK_SIZE;
+    piece->block[1].y = piece->block[0].y;
+    // block[2] is under block[1]
+    piece->block[2].x = piece->block[1].x;
+    piece->block[2].y = piece->block[1].y + BLOCK_SIZE;
+    //->block[3] is on the right of ->block[2]
+    piece->block[3].x = piece->block[2].x + BLOCK_SIZE;
+    piece->block[3].y = piece->block[2].y;
+    break;
+  case Dog_right:
+    //->block[0] become ->block[3]
+    piece->block[0].x = piece->block[3].x;
+    piece->block[0].y = piece->block[3].y;
+    // block[1] on the left of block[0]
+    piece->block[1].x = piece->block[0].x - BLOCK_SIZE;
+    piece->block[1].y = piece->block[0].y;
+    // block[2] is under block[1]
+    piece->block[2].x = piece->block[1].x;
+    piece->block[2].y = piece->block[1].y + BLOCK_SIZE;
+    //->block[3] is on the left of ->block[2]
+    piece->block[3].x = piece->block[2].x - BLOCK_SIZE;
+    piece->block[3].y = piece->block[2].y;
+    break;
+  }
+}
 
 bool update_piece(piece_t *piece, KeyboardKey key, Border_t *border,
                   All_Recs_t *All_recs) {
@@ -503,6 +588,7 @@ bool update_piece(piece_t *piece, KeyboardKey key, Border_t *border,
         rotate_piece_LeftToDown(piece);
         break;
       case RIGHT:
+        rotate_piece_RightToUp(piece);
         break;
       }
     }

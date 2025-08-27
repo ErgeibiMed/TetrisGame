@@ -3,18 +3,10 @@
 
 
 ## Progess
-### Progess00
-![Progress00](https://github.com/ErgeibiMed/TetrisGame/blob/main/progresspng/ProgressSoFar00.png)
+###The progrees is can be seing in the folder [progresspng]((https://github.com/ErgeibiMed/TetrisGame/blob/main/progresspng)
 
-### Progess01
-![Progress01](https://github.com/ErgeibiMed/TetrisGame/blob/main/progresspng/ProgressSoFar01.png)
-
-### Progess02
-![Progress02](https://github.com/ErgeibiMed/TetrisGame/blob/main/progresspng/ProgressSoFar02.png)
-
-
-### Progess03
-![Progress03](https://github.com/ErgeibiMed/TetrisGame/blob/main/progresspng/ProgressSoFar03.png)
+### Progess04
+![Progress04](https://github.com/ErgeibiMed/TetrisGame/blob/main/progresspng/ProgressSoFar04.png)
 
 
 # Licenses
