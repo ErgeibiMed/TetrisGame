@@ -34,9 +34,10 @@ piece_t create_piece_at_pos(Vector2 initial_pos, piece_name p_n) {
   piece.piece_name = p_n;
   piece.block[0].x = initial_pos.x;
   piece.block[0].y = initial_pos.y;
+  // ALL pieces have an initial direction set to up
+  piece.dir = UP;
   switch (p_n) {
   case T:
-    piece.dir = UP;
     // block[1] is under block[0]
     piece.block[1].x = piece.block[0].x;
     piece.block[1].y = piece.block[0].y + BLOCK_SIZE;
@@ -51,7 +52,6 @@ piece_t create_piece_at_pos(Vector2 initial_pos, piece_name p_n) {
     piece.p_color = RED;
     break;
   case Square:
-    piece.dir = UP;
     // block[1] is under block[0]
     piece.block[1].x = piece.block[0].x;
     piece.block[1].y = piece.block[0].y + BLOCK_SIZE;
@@ -65,7 +65,6 @@ piece_t create_piece_at_pos(Vector2 initial_pos, piece_name p_n) {
     piece.p_color = GREEN;
     break;
   case Stick:
-    piece.dir = UP;
     // block[1] is under block[0]
     piece.block[1].x = piece.block[0].x;
     piece.block[1].y = piece.block[0].y + BLOCK_SIZE;
@@ -79,7 +78,6 @@ piece_t create_piece_at_pos(Vector2 initial_pos, piece_name p_n) {
     piece.p_color = BLUE;
     break;
   case L_left:
-    piece.dir = LEFT;
     // block[1] is under of block[0]
     piece.block[1].x = piece.block[0].x;
     piece.block[1].y = piece.block[0].y + BLOCK_SIZE;
@@ -93,7 +91,6 @@ piece_t create_piece_at_pos(Vector2 initial_pos, piece_name p_n) {
     piece.p_color = YELLOW;
     break;
   case L_right:
-    piece.dir = RIGHT;
     // block[1] is under block[0]
     piece.block[1].x = piece.block[0].x;
     piece.block[1].y = piece.block[0].y + BLOCK_SIZE;
@@ -107,7 +104,6 @@ piece_t create_piece_at_pos(Vector2 initial_pos, piece_name p_n) {
     piece.p_color = ORANGE;
     break;
   case Dog_left:
-    piece.dir = LEFT;
     // block[1] is on the right of block[0]
     piece.block[1].x = piece.block[0].x + BLOCK_SIZE;
     piece.block[1].y = piece.block[0].y;
@@ -121,7 +117,6 @@ piece_t create_piece_at_pos(Vector2 initial_pos, piece_name p_n) {
     piece.p_color = BLUE;
     break;
   case Dog_right:
-    piece.dir = RIGHT;
     // block[1] is on the left of block[0]
     piece.block[1].x = piece.block[0].x - BLOCK_SIZE;
     piece.block[1].y = piece.block[0].y;
@@ -244,7 +239,6 @@ void rotate_piece_UpToLeft(piece_t *piece) {
     // block[3] NO_OP
     break;
   case L_left:
-
     // block[0] on the left of block[2]*2BLock_size
     piece->block[0].x = piece->block[2].x - 2 * BLOCK_SIZE;
     piece->block[0].y = piece->block[2].y;
@@ -252,9 +246,9 @@ void rotate_piece_UpToLeft(piece_t *piece) {
     piece->block[1].x = piece->block[0].x + BLOCK_SIZE;
     piece->block[1].y = piece->block[0].y;
     // block[2] NO_OP
-    // block[3] is under block[2]
+    // block[3] is on top block[2]
     piece->block[3].x = piece->block[2].x;
-    piece->block[3].y = piece->block[2].y + BLOCK_SIZE;
+    piece->block[3].y = piece->block[2].y - BLOCK_SIZE;
     break;
   case L_right:
     // block[0] on the right of block[2]*2BLock_size
@@ -298,6 +292,93 @@ void rotate_piece_UpToLeft(piece_t *piece) {
   }
 }
 
+void rotate_piece_LeftToDown(piece_t *piece) {
+  piece->dir = DOWN;
+  switch (piece->piece_name) {
+  case T:
+    // block[3] become  block[0] or on the left of block[1]
+    piece->block[3].x = piece->block[0].x;
+    piece->block[3].y = piece->block[0].y;
+    // block[0] is under block[1] or the old block[2]
+    piece->block[0].x = piece->block[2].x;
+    piece->block[0].y = piece->block[2].y;
+    // block[1]
+    /*nop*/ ////////////
+            // block[2] is on the right  block[1]
+    piece->block[2].x = piece->block[1].x + BLOCK_SIZE;
+    piece->block[2].y = piece->block[1].y;
+    break;
+
+  case Square:
+    // do nothing for square/////
+    break;
+  case Stick:
+    // block[0]/// no op
+    // block[1] is on  top of block[0]
+    piece->block[1].x = piece->block[0].x;
+    piece->block[1].y = piece->block[0].y - BLOCK_SIZE;
+    // block[2] is on  top of block[1]
+    piece->block[2].x = piece->block[1].x;
+    piece->block[2].y = piece->block[1].y - BLOCK_SIZE;
+    // block[3] on top of block[2]
+    piece->block[3].x = piece->block[2].x;
+    piece->block[3].y = piece->block[2].y - BLOCK_SIZE;
+    break;
+  case L_left:
+    // block[0] NO_OP
+    // block[1] is on top of block[0]
+    piece->block[1].x = piece->block[0].x;
+    piece->block[1].y = piece->block[0].y - BLOCK_SIZE;
+    // block[2] is on top of block[1]
+    piece->block[2].x = piece->block[1].x;
+    piece->block[2].y = piece->block[1].y - BLOCK_SIZE;
+    // block[3] is on the right of block[2]
+    piece->block[3].x = piece->block[2].x + BLOCK_SIZE;
+    piece->block[3].y = piece->block[2].y;
+    break;
+  case L_right:
+    // block[0] NO_OP
+    // block[1] is on top of block[0]
+    piece->block[1].x = piece->block[0].x;
+    piece->block[1].y = piece->block[0].y - BLOCK_SIZE;
+    // block[2] is on top of block[1]
+    piece->block[2].x = piece->block[1].x;
+    piece->block[2].y = piece->block[1].y - BLOCK_SIZE;
+    // block[3] is on the left of block[2]
+    piece->block[3].x = piece->block[2].x - BLOCK_SIZE;
+    piece->block[3].y = piece->block[2].y;
+    break;
+  case Dog_left:
+    //->block[2] become ->block[1]
+    piece->block[2].x = piece->block[1].x;
+    piece->block[2].y = piece->block[1].y;
+    // block[1] become block[0]
+    piece->block[1].x = piece->block[0].x;
+    piece->block[1].y = piece->block[0].y;
+    // block[0] is on the right  block[1]
+    piece->block[0].x = piece->block[1].x + BLOCK_SIZE;
+    piece->block[0].y = piece->block[1].y;
+    //->block[3] is on the left of->block[2]
+    piece->block[3].x = piece->block[2].x - BLOCK_SIZE;
+    piece->block[3].y = piece->block[2].y;
+    break;
+  case Dog_right:
+    //->block[2] become ->block[1]
+    piece->block[2].x = piece->block[1].x;
+    piece->block[2].y = piece->block[1].y;
+    // block[1] become block[0]
+    piece->block[1].x = piece->block[0].x;
+    piece->block[1].y = piece->block[0].y;
+    // block[0] is on the left block[1]
+    piece->block[0].x = piece->block[1].x - BLOCK_SIZE;
+    piece->block[0].y = piece->block[1].y;
+    //->block[3] is on the right of ->block[2]
+    piece->block[3].x = piece->block[2].x + BLOCK_SIZE;
+    piece->block[3].y = piece->block[2].y;
+    break;
+  }
+}
+
 bool update_piece(piece_t *piece, KeyboardKey key, Border_t *border,
                   All_Recs_t *All_recs) {
   // update piece pos
@@ -325,9 +406,20 @@ bool update_piece(piece_t *piece, KeyboardKey key, Border_t *border,
     piece->block[2].y += 0.20 * speed;
     piece->block[3].y += 0.20 * speed;
     if (key == KEY_UP) {
-      rotate_piece_UpToLeft(piece);
-      return false;
+      switch (piece->dir) {
+      case DOWN:
+        break;
+      case UP:
+        rotate_piece_UpToLeft(piece);
+        break;
+      case LEFT:
+        rotate_piece_LeftToDown(piece);
+        break;
+      case RIGHT:
+        break;
+      }
     }
+    // return false;
     if (key == KEY_DOWN) {
       piece->block[0].y += speed;
       piece->block[1].y += speed;
